@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Heat Check</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #F5F2EF;
+      --surface: #FFFFFF;
+      --border: #D9D4CE;
+      --border-strong: #B8B0A8;
+      --text: #0A0A0A;
+      --text-muted: #4A4540;
+      --text-hint: #9A948E;
+      --accent: #7D2935;
+      --accent-light: #F5EEF0;
+      --accent-mid: #A63D4A;
+      --warning: #1B2A4A;
+      --warning-light: #EEF1F6;
+      --mono: 'DM Mono', monospace;
+      --sans: 'DM Sans', sans-serif;
+      --radius: 10px;
+      --radius-sm: 6px;
+    }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 2rem 1rem 4rem;
+    }
+
+    .page {
+      max-width: 560px;
+      margin: 0 auto;
+    }
+
+    header {
+      margin-bottom: 2.5rem;
+    }
+
+    .logo-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 0.4rem;
+    }
+
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      background: #1B2A4A;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .logo-icon svg {
+      width: 18px;
+      height: 18px;
+      fill: none;
+      stroke: #fff;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    h1 {
+      font-size: 1.75rem;
+      font-weight: 500;
+      letter-spacing: -0.01em;
+      color: var(--text);
+    }
+
+    .subtitle {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .card-title {
+      font-size: 0.75rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #1B2A4A;
+      margin-bottom: 1.25rem;
+    }
+
+    .field {
+      margin-bottom: 1.25rem;
+    }
+
+    .field:last-child {
+      margin-bottom: 0;
+    }
+
+    label {
+      display: block;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    input[type="number"],
+    input[type="text"],
+    select {
+      font-family: var(--mono);
+      font-size: 0.9375rem;
+      color: var(--text);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.5rem 0.75rem;
+      width: 100%;
+      outline: none;
+      transition: border-color 0.15s;
+      -moz-appearance: textfield;
+    }
+
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+    input:focus, select:focus {
+      border-color: #A63D4A;
+    }
+
+    .pace-inputs {
+      display: grid;
+      grid-template-columns: 1fr 12px 1fr 12px 1fr;
+      gap: 0.35rem;
+      align-items: center;
+    }
+
+    .pace-sep {
+      text-align: center;
+      font-family: var(--mono);
+      color: var(--text-hint);
+      font-size: 1rem;
+    }
+
+    .toggle-group {
+      display: flex;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      width: fit-content;
+    }
+
+    .toggle-group button {
+      font-family: var(--sans);
+      font-size: 0.8125rem;
+      font-weight: 500;
+      padding: 0.4rem 0.875rem;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: background 0.12s, color 0.12s;
+    }
+
+    .toggle-group button.active {
+      background: #1B2A4A;
+      color: #fff;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+
+    .intensity-options {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .intensity-options label {
+      display: flex;
+      align-items: center;
+      gap: 0.375rem;
+      font-size: 0.8125rem;
+      font-weight: 400;
+      color: var(--text);
+      cursor: pointer;
+      margin: 0;
+    }
+
+    input[type="radio"] {
+      accent-color: #7D2935;
+      width: 15px;
+      height: 15px;
+      cursor: pointer;
+    }
+
+    .hint {
+      font-size: 0.75rem;
+      color: var(--text-hint);
+      margin-top: 0.35rem;
+    }
+
+    .calc-btn {
+      width: 100%;
+      padding: 0.75rem;
+      background: #7D2935;
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-family: var(--sans);
+      font-size: 0.9375rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s;
+      margin-top: 0.5rem;
+    }
+
+    .calc-btn:hover { background: #5C1D27; }
+
+    .result-card {
+      background: #F5EEF0;
+      border: 1px solid #C9B8BC;
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      display: none;
+    }
+
+    .result-card { }
+
+    .result-card.warning-result {
+      background: var(--warning-light);
+      border-color: #B8C4D8;
+    }
+
+    .result-main {
+      display: flex;
+      align-items: baseline;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .result-label {
+      font-size: 0.75rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #7D2935;
+    }
+
+    .result-card.warning-result .result-label { color: #1B2A4A; }
+
+    .result-pace {
+      font-family: var(--mono);
+      font-size: 2rem;
+      font-weight: 500;
+      color: var(--text);
+      letter-spacing: -0.02em;
+    }
+
+    .result-unit {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+
+    .result-details {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem;
+      border-top: 1px solid #C9B8BC;
+      padding-top: 1rem;
+    }
+
+    .result-card.warning-result .result-details { border-color: #A8B8D0; }
+
+    .detail-item {}
+    .detail-val {
+      font-family: var(--mono);
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--text);
+    }
+    .detail-lbl {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.15rem;
+    }
+
+    .no-adjustment {
+      font-size: 0.875rem;
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    .result-card.warning-result .no-adjustment { color: var(--warning); }
+
+    .explanation {
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+      margin-top: 0.75rem;
+      line-height: 1.5;
+    }
+
+    .feeling-slider-wrap {
+      position: relative;
+      padding: 0.25rem 0 0.5rem;
+    }
+
+    .feeling-labels {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      margin-bottom: 0.6rem;
+    }
+
+    .feeling-label {
+      font-size: 0.6875rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      text-align: center;
+    }
+
+    .feeling-label.weak { text-align: left; }
+    .feeling-label.strong { text-align: right; }
+
+    .feeling-label.weak { color: #1B2A4A; }
+    .feeling-label.strong { color: #7D2935; }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 4px;
+      border-radius: 2px;
+      background: linear-gradient(to right, #1B2A4A 0%, var(--border-strong) 50%, #7D2935 100%);
+      outline: none;
+      cursor: pointer;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--surface);
+      border: 2px solid var(--border-strong);
+      cursor: grab;
+      transition: border-color 0.15s, transform 0.1s;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+    }
+
+    input[type="range"]::-webkit-slider-thumb:active {
+      cursor: grabbing;
+      transform: scale(1.15);
+      border-color: var(--accent-mid);
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--surface);
+      border: 2px solid var(--border-strong);
+      cursor: grab;
+    }
+
+    .feeling-readout {
+      text-align: center;
+      margin-top: 0.6rem;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      min-height: 1.2rem;
+      transition: color 0.2s;
+    }
+
+
+    .mode-tabs {
+      display: flex;
+      gap: 0;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      margin-bottom: 1rem;
+      width: 100%;
+    }
+
+    .mode-tab {
+      flex: 1;
+      padding: 0.6rem 1rem;
+      font-family: var(--sans);
+      font-size: 0.8125rem;
+      font-weight: 500;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: background 0.12s, color 0.12s;
+      text-align: center;
+    }
+
+    .mode-tab.active {
+      background: #1B2A4A;
+      color: #fff;
+    }
+
+    .workout-textarea {
+      font-family: var(--mono);
+      font-size: 0.875rem;
+      color: var(--text);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.75rem;
+      width: 100%;
+      min-height: 130px;
+      resize: vertical;
+      outline: none;
+      line-height: 1.6;
+      transition: border-color 0.15s;
+    }
+
+    .workout-textarea:focus { border-color: var(--accent-mid); }
+
+    .workout-textarea::placeholder { color: var(--text-hint); }
+
+    .analyze-btn {
+      width: 100%;
+      padding: 0.6rem;
+      background: none;
+      color: #7D2935;
+      border: 1px solid #A63D4A;
+      border-radius: var(--radius-sm);
+      font-family: var(--sans);
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      margin-top: 0.75rem;
+    }
+
+    .analyze-btn:hover { background: var(--accent-light); }
+    .analyze-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .workout-result {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: var(--accent-light);
+      border: 1px solid #C9B8BC;
+      border-radius: var(--radius-sm);
+      display: none;
+    }
+
+    .workout-result.visible { display: block; }
+
+    .workout-result-label {
+      font-size: 0.7rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      margin-bottom: 0.6rem;
+    }
+
+    .workout-result-text {
+      font-family: var(--mono);
+      font-size: 0.8125rem;
+      color: var(--text);
+      line-height: 1.8;
+      white-space: pre-wrap;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid #7D2935;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    footer {
+      margin-top: 2rem;
+      font-size: 0.75rem;
+      color: var(--text-hint);
+      line-height: 1.6;
+    }
+
+    @media (max-width: 400px) {
+      .two-col { grid-template-columns: 1fr; }
+      .result-details { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <div class="logo-row">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 2c0 0 4 4 4 9c0 2.5-1.5 4.5-3 6c0-2-1-3.5-2.5-4.5C11.5 14 12 16 11 18c-1-1-2-2.5-2-4.5C9 10 12 2 12 2z"/><path d="M9 18c0 2 1.5 3.5 3 4c1.5-.5 3-2 3-4"/></svg>
+      </div>
+      <h1>Heat Check</h1>
+    </div>
+    <p style="font-size:0.7rem; font-weight:500; text-transform:uppercase; letter-spacing:0.09em; color:#1B2A4A; margin-bottom:0.5rem;">Align your splits to the conditions.</p>
+    <p class="subtitle">Dial in your conditions, choose your intensity, and either drop in a single pace or paste your full workout. Heat Check adjusts every split for temperature, humidity, and how you&#8217;re feeling on the day — so you know exactly what to run before you step out the door.</p>
+  </header>
+
+  <!-- Unit toggles -->
+  <div style="display:flex; gap:1rem; margin-bottom:1.25rem; align-items:center; flex-wrap:wrap;">
+    <div>
+      <span style="font-size:0.75rem;font-weight:500;color:var(--text-hint);text-transform:uppercase;letter-spacing:0.06em;margin-right:0.5rem;">Distance</span>
+      <div class="toggle-group">
+        <button class="active" id="btn-miles" onclick="setDistUnit('miles')">Miles</button>
+        <button id="btn-km" onclick="setDistUnit('km')">KM</button>
+      </div>
+    </div>
+    <div>
+      <span style="font-size:0.75rem;font-weight:500;color:var(--text-hint);text-transform:uppercase;letter-spacing:0.06em;margin-right:0.5rem;">Temp</span>
+      <div class="toggle-group">
+        <button class="active" id="btn-f" onclick="setTempUnit('F')">°F</button>
+        <button id="btn-c" onclick="setTempUnit('C')">°C</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mode selector -->
+  <div class="mode-tabs">
+    <button class="mode-tab active" id="tab-quick" onclick="setMode('quick')">Quick pace</button>
+    <button class="mode-tab" id="tab-workout" onclick="setMode('workout')">Full workout</button>
+  </div>
+
+  <!-- Workout parser card -->
+  <div id="workout-card" class="card" style="display:none;">
+    <div class="card-title">Paste your workout</div>
+    <div class="field" style="margin-bottom:0;">
+      <textarea class="workout-textarea" id="workout-input" placeholder="e.g.&#10;2 mile warm up&#10;10 x 2 min on / 1 min off&#10;on = 5:40/mile&#10;off = 6:40/mile&#10;2 mile cool down"></textarea>
+    </div>
+  </div>
+
+  <!-- Planned Pace -->
+  <div class="card" id="quick-pace-card">
+    <div class="card-title">Your planned pace</div>
+    <div class="field">
+      <label id="pace-label">Planned pace (min / mile)</label>
+      <div class="pace-inputs" style="grid-template-columns: 1fr 12px 1fr;">
+        <input type="number" id="pace-m" min="0" max="99" placeholder="MM" />
+        <span class="pace-sep">:</span>
+        <input type="number" id="pace-s" min="0" max="59" placeholder="SS" />
+      </div>
+      <p class="hint">e.g. 9:30 / mile &rarr; 09 : 30</p>
+    </div>
+
+    <div class="field">
+      <label id="dist-label">Distance (miles)</label>
+      <input type="number" id="distance" min="0.1" step="0.1" placeholder="e.g. 13.1" />
+    </div>
+
+    <div class="field">
+      <label>Intensity</label>
+      <div class="intensity-options">
+        <label><input type="radio" name="intensity" value="easy" checked onchange="updateIntensityHelp()" /> Easy</label>
+        <label><input type="radio" name="intensity" value="tempo" onchange="updateIntensityHelp()" /> Threshold</label>
+        <label><input type="radio" name="intensity" value="race" onchange="updateIntensityHelp()" /> Max Effort</label>
+      </div>
+      <div id="intensity-help" style="margin-top:0.75rem; padding:0.65rem 0.875rem; background:var(--bg); border-radius:var(--radius-sm); border-left:3px solid var(--accent);">
+        <p style="font-size:0.8125rem; color:var(--text-muted); line-height:1.5; margin:0;" id="intensity-help-text">Conversational effort — you can hold a full sentence while running. Heart rate stays low. These runs build your aerobic base and make up the bulk of your training week.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Weather -->
+  <div class="card">
+    <div class="card-title">Weather conditions</div>
+    <div class="two-col">
+      <div class="field">
+        <label id="temp-label">Temperature (°F)</label>
+        <input type="number" id="temperature" placeholder="e.g. 85" />
+      </div>
+      <div class="field">
+        <label id="dew-label">Dew point (°F)</label>
+        <input type="number" id="dewpoint" placeholder="e.g. 65" />
+      </div>
+    </div>
+    <p class="hint">Not sure of dew point? Check Weather.gov or your local weather app.</p>
+  </div>
+
+  <!-- Feeling slider -->
+  <div class="card">
+    <div class="card-title">How are you feeling today?</div>
+    <div class="field" style="margin-bottom:0;">
+      <div class="feeling-labels">
+        <span class="feeling-label weak">Weak</span>
+        <span class="feeling-label" style="color:var(--text-hint);">Neutral</span>
+        <span class="feeling-label strong">Strong</span>
+      </div>
+      <div class="feeling-slider-wrap">
+        <input type="range" id="feeling-slider" min="-5" max="5" step="1" value="0" oninput="updateFeeling(this.value)" />
+      </div>
+      <div class="feeling-readout" id="feeling-readout">No adjustment — running as planned</div>
+    </div>
+  </div>
+
+  <button class="calc-btn" id="main-calc-btn" onclick="handleCalculate()">Calculate adjusted pace</button>
+
+  <!-- Unified output zone -->
+  <div id="output-zone" style="display:none; margin-top:1rem;">
+
+    <!-- Quick pace result -->
+    <div class="result-card" id="result-card" style="display:none; margin-bottom:0;">
+      <div class="result-label" id="result-label">Adjusted pace</div>
+      <div class="result-main">
+        <div class="result-pace" id="result-pace">—</div>
+        <div class="result-unit" id="result-unit">/ mile</div>
+      </div>
+      <div class="result-details">
+        <div class="detail-item">
+          <div class="detail-val" id="detail-slowdown">—</div>
+          <div class="detail-lbl">sec/mile slower</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-val" id="detail-pct">—</div>
+          <div class="detail-lbl">% pace impact</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-val" id="detail-time">—</div>
+          <div class="detail-lbl">added to finish</div>
+        </div>
+      </div>
+      <p class="explanation" id="result-explanation"></p>
+    </div>
+
+    <!-- Workout result -->
+    <div id="workout-result" style="display:none;">
+      <!-- Key segment highlight -->
+      <div id="key-segment-box" style="display:none; background:#1B2A4A; border-radius:var(--radius); padding:1.25rem 1.5rem; margin-bottom:1rem;">
+        <div style="font-size:0.7rem; font-weight:500; text-transform:uppercase; letter-spacing:0.09em; color:rgba(255,255,255,0.7); margin-bottom:0.35rem;">Key effort</div>
+        <div style="display:flex; align-items:baseline; gap:0.5rem; flex-wrap:wrap;">
+          <span id="key-segment-name" style="font-size:1rem; font-weight:500; color:#fff;"></span>
+          <span style="color:rgba(255,255,255,0.6); font-size:0.875rem;">→</span>
+          <span id="key-segment-pace" style="font-family:var(--mono); font-size:1.75rem; font-weight:500; color:#fff; letter-spacing:-0.02em;"></span>
+          <span id="key-segment-unit" style="font-size:0.875rem; color:rgba(255,255,255,0.7);">/ mile</span>
+        </div>
+        <div id="key-segment-original" style="font-size:0.8125rem; color:rgba(255,255,255,0.6); margin-top:0.25rem;"></div>
+      </div>
+
+      <!-- Full adjusted workout -->
+      <div style="background:var(--accent-light); border:1px solid #b7dece; border-radius:var(--radius); padding:1.25rem 1.5rem; margin-bottom:1rem;">
+        <div style="font-size:0.7rem; font-weight:500; text-transform:uppercase; letter-spacing:0.09em; color:#7D2935; margin-bottom:0.75rem;">Adjusted workout</div>
+        <div id="workout-result-text" style="font-family:var(--mono); font-size:0.8125rem; color:var(--text); line-height:2; white-space:pre-wrap;"></div>
+      </div>
+
+      <!-- Summary paragraph -->
+      <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:1.25rem 1.5rem;">
+        <div style="font-size:0.7rem; font-weight:500; text-transform:uppercase; letter-spacing:0.09em; color:var(--text-hint); margin-bottom:0.5rem;">Coach's take</div>
+        <ul id="workout-summary" style="list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:0.5rem;"></ul>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+    <p>Pace adjustment is estimated using dew point — the primary driver of heat stress. Individuals respond differently; use this as a guide, not a hard limit. Formula based on research from <em>Runners Connect</em> and exercise physiology studies.</p>
+  </footer>
+
+</div>
+<script>
+  let distUnit = 'miles';
+  let tempUnit = 'F';
+
+  const feelingMessages = {
+    '-5': 'Very off day — adding extra cushion',
+    '-4': 'Rough shape — taking it easier',
+    '-3': 'A bit sluggish — easing back some',
+    '-2': 'Slightly below par — minor slack added',
+    '-1': 'Not quite 100% — slight buffer added',
+     '0': 'No adjustment — running as planned',
+     '1': 'Feeling decent — slight edge taken off',
+     '2': 'Pretty good — running a touch faster',
+     '3': 'Feeling strong — pushing a bit more',
+     '4': 'On fire — significant boost applied',
+     '5': 'Best day ever — full attack mode',
+  };
+
+  const intensityHelp = {
+    easy: 'Conversational effort — you can hold a full sentence while running. Heart rate stays low (60–70% max). These runs build your aerobic base and make up the bulk of your training week.',
+    tempo: 'Hard but controlled — you can manage a few words, not full sentences. Run at the edge of your comfort zone for sustained efforts. Builds lactate threshold and teaches your body to sustain faster paces.',
+    race: 'Everything you have — talking is off the table. Reserved for intervals, race day, or short all-out efforts. Heart rate is at or near max and every step is deliberate.'
+  };
+
+  function updateIntensityHelp() {
+    const val = document.querySelector('input[name="intensity"]:checked').value;
+    document.getElementById('intensity-help-text').textContent = intensityHelp[val];
+    const colors = { easy: 'var(--accent)', tempo: 'var(--warning)', race: '#0A0A0A' };
+    document.getElementById('intensity-help').style.borderLeftColor = colors[val];
+  }
+
+  function updateFeeling(val) {
+    const readout = document.getElementById('feeling-readout');
+    readout.textContent = feelingMessages[val] || 'No adjustment';
+    const pct = parseInt(val) / 100;
+    readout.style.color = val < 0 ? 'var(--warning)' : val > 0 ? 'var(--accent)' : 'var(--text-muted)';
+  }
+
+  function setDistUnit(u) {
+    distUnit = u;
+    document.getElementById('btn-miles').classList.toggle('active', u === 'miles');
+    document.getElementById('btn-km').classList.toggle('active', u === 'km');
+    document.getElementById('pace-label').textContent = 'Planned pace (min / ' + u.replace('miles','mile') + ')';
+    document.getElementById('dist-label').textContent = 'Distance (' + u + ')';
+    document.getElementById('result-unit').textContent = '/ ' + u.replace('miles','mile');
+    document.getElementById('detail-slowdown').nextElementSibling.textContent = 'sec/' + u.replace('miles','mile') + ' slower';
+  }
+
+  function setTempUnit(u) {
+    tempUnit = u;
+    document.getElementById('btn-f').classList.toggle('active', u === 'F');
+    document.getElementById('btn-c').classList.toggle('active', u === 'C');
+    const s = u === 'F' ? '(°F)' : '(°C)';
+    document.getElementById('temp-label').textContent = 'Temperature ' + s;
+    document.getElementById('dew-label').textContent = 'Dew point ' + s;
+  }
+
+  function toF(val) {
+    return tempUnit === 'C' ? val * 9/5 + 32 : val;
+  }
+
+  function getPaceSeconds(h, m, s) {
+    return h * 3600 + m * 60 + s;
+  }
+
+  function fmtPace(totalSec) {
+    const h = Math.floor(totalSec / 3600);
+    const m = Math.floor((totalSec % 3600) / 60);
+    const s = Math.round(totalSec % 60);
+    const mm = String(m).padStart(2,'0');
+    const ss = String(s).padStart(2,'0');
+    return h > 0 ? `${h}:${mm}:${ss}` : `${m}:${ss}`;
+  }
+
+  function fmtTime(totalSec) {
+    const h = Math.floor(totalSec / 3600);
+    const m = Math.floor((totalSec % 3600) / 60);
+    const s = Math.round(totalSec % 60);
+    if (h > 0) return `${h}h ${m}m`;
+    if (m > 0) return `+${m}m ${s}s`;
+    return `+${s}s`;
+  }
+
+  // Dew point based adjustment factor (seconds per mile added per degree dew point above threshold)
+  // Based on published research: above 55°F dew point, performance degrades
+  function getDewAdjustment(dewF, intensity) {
+    // Adjustment in % of pace per degree dew point above 55F
+    // Easy = less affected, Max Effort = most affected
+    const sensitivityMap = { easy: 0.0025, tempo: 0.003, race: 0.004 };
+    const sensitivity = sensitivityMap[intensity] || 0.003;
+    const threshold = 55; // dew point (F) below which no adjustment needed
+    const excess = Math.max(0, dewF - threshold);
+    return Math.min(excess * sensitivity, 0.20); // cap at 20% slowdown
+  }
+
+  function calculate() {
+    const pM = parseInt(document.getElementById('pace-m').value) || 0;
+    const pS = parseInt(document.getElementById('pace-s').value) || 0;
+    const dist = parseFloat(document.getElementById('distance').value);
+    const tempRaw = parseFloat(document.getElementById('temperature').value);
+    const dewRaw = parseFloat(document.getElementById('dewpoint').value);
+    const intensity = document.querySelector('input[name="intensity"]:checked').value;
+    const feelingVal = parseInt(document.getElementById('feeling-slider').value); // -5 to +5
+
+    if (!pM && !pS) { alert('Please enter your planned pace.'); return; }
+    if (!dist || dist <= 0) { alert('Please enter a distance.'); return; }
+    if (isNaN(tempRaw) || isNaN(dewRaw)) { alert('Please enter temperature and dew point.'); return; }
+
+    const paceSec = getPaceSeconds(0, pM, pS);
+    if (paceSec <= 0) { alert('Pace must be greater than zero.'); return; }
+
+    const tempF = toF(tempRaw);
+    const dewF = toF(dewRaw);
+
+    if (dewF > tempF) { alert('Dew point cannot be higher than temperature.'); return; }
+
+    const adjustPct = getDewAdjustment(dewF, intensity);
+    // Feeling slider: each step = 1% pace modifier. Negative = slower (weak day), positive = faster (strong day).
+    const feelingPct = -(feelingVal * 0.01); // -5 → +5% slower, +5 → -5% faster
+    const totalAdjustPct = adjustPct + feelingPct;
+    const addedSecPerUnit = paceSec * totalAdjustPct;
+    const adjustedPaceSec = paceSec + addedSecPerUnit;
+    const addedTotal = addedSecPerUnit * dist;
+
+    const card = document.getElementById('result-card');
+    card.classList.remove('warning-result');
+    card.style.display = 'block';
+    document.getElementById('workout-result').style.display = 'none';
+    document.getElementById('output-zone').style.display = 'block';
+
+    document.getElementById('result-pace').textContent = fmtPace(adjustedPaceSec);
+    document.getElementById('result-unit').textContent = '/ ' + (distUnit === 'miles' ? 'mile' : 'km');
+
+    if (totalAdjustPct === 0) {
+      document.getElementById('result-label').textContent = 'No adjustment needed';
+      document.getElementById('detail-slowdown').textContent = '0';
+      document.getElementById('detail-pct').textContent = '0%';
+      document.getElementById('detail-time').textContent = '0s';
+      document.getElementById('result-explanation').textContent =
+        'Conditions are good and you\'re feeling great — run your planned pace.';
+    } else {
+      const pctNum = (Math.abs(totalAdjustPct) * 100).toFixed(1);
+      const faster = totalAdjustPct < 0;
+      document.getElementById('result-label').textContent = faster ? 'Boosted pace' : 'Adjusted pace';
+      document.getElementById('detail-slowdown').textContent = (faster ? '-' : '+') + Math.abs(Math.round(addedSecPerUnit)) + 's';
+      document.getElementById('detail-pct').textContent = (faster ? '-' : '+') + pctNum + '%';
+      document.getElementById('detail-time').textContent = faster
+        ? '-' + fmtTime(-addedTotal).replace('+','')
+        : fmtTime(addedTotal);
+      document.getElementById('detail-slowdown').nextElementSibling.textContent =
+        'sec/' + (distUnit === 'miles' ? 'mile' : 'km') + (faster ? ' faster' : ' slower');
+
+      let desc = '';
+      if (dewF >= 70 && !faster) { desc = 'Oppressive heat and humidity — running at planned pace is not recommended. Run by feel.'; card.classList.add('warning-result'); }
+      else if (dewF >= 65 && !faster) desc = 'Very humid — significant effort increase. Consider an easier effort.';
+      else if (dewF >= 60 && !faster) desc = 'Moderately humid — you\'ll notice the heat. Stay hydrated.';
+      else if (dewF >= 55 && !faster) desc = 'Slightly humid — minor slowdown expected.';
+      else if (faster) desc = 'You\'re feeling strong — pace is adjusted up. Trust your body and go for it.';
+
+      document.getElementById('result-explanation').textContent = desc;
+      document.getElementById('result-label').textContent = (dewF >= 70 && !faster) ? '⚠ Adjusted pace' : (faster ? 'Boosted pace' : 'Adjusted pace');
+    }
+  }
+
+  function setMode(mode) {
+    const isWorkout = mode === 'workout';
+    document.getElementById('tab-quick').classList.toggle('active', !isWorkout);
+    document.getElementById('tab-workout').classList.toggle('active', isWorkout);
+    document.getElementById('workout-card').style.display = isWorkout ? 'block' : 'none';
+    document.getElementById('quick-pace-card').style.display = isWorkout ? 'none' : 'block';
+    document.getElementById('main-calc-btn').textContent = isWorkout ? 'Calculate adjusted workout' : 'Calculate adjusted pace';
+  }
+
+  function handleCalculate() {
+    const isWorkout = document.getElementById('tab-workout').classList.contains('active');
+    if (isWorkout) analyzeWorkout();
+    else calculate();
+  }
+
+  async function analyzeWorkout() {
+    const workout = document.getElementById('workout-input').value.trim();
+    if (!workout) { alert('Please paste your workout first.'); return; }
+
+    const tempRaw = parseFloat(document.getElementById('temperature').value);
+    const dewRaw = parseFloat(document.getElementById('dewpoint').value);
+    if (isNaN(tempRaw) || isNaN(dewRaw)) { alert('Please enter temperature and dew point in the weather section first.'); return; }
+
+    const tempF = toF(tempRaw);
+    const dewF = toF(dewRaw);
+    if (dewF > tempF) { alert('Dew point cannot be higher than temperature.'); return; }
+
+    const intensity = document.querySelector('input[name="intensity"]:checked').value;
+    const feelingVal = parseInt(document.getElementById('feeling-slider').value);
+
+    const adjustPct = getDewAdjustment(dewF, intensity);
+    const feelingPct = -(feelingVal * 0.01);
+    const totalAdjustPct = adjustPct + feelingPct;
+    const pctDisplay = (totalAdjustPct * 100).toFixed(1);
+    const direction = totalAdjustPct > 0 ? 'slower' : totalAdjustPct < 0 ? 'faster' : 'unchanged';
+    const unitLabel = distUnit === 'miles' ? 'mile' : 'km';
+
+    const btn = document.getElementById('main-calc-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>Analyzing...';
+
+    document.getElementById('result-card').style.display = 'none';
+    document.getElementById('workout-result').style.display = 'none';
+    document.getElementById('output-zone').style.display = 'none';
+
+    const prompt = `You are a running coach assistant helping a runner adjust their workout paces for heat, humidity, and how they feel today.
+
+WORKOUT:
+${workout}
+
+CONDITIONS:
+- Temperature: ${tempF.toFixed(0)}°F, Dew point: ${dewF.toFixed(0)}°F
+- Total pace adjustment: ${pctDisplay}% ${direction}
+- Distance units: ${unitLabel}
+
+INSTRUCTIONS:
+Return ONLY a valid JSON object with exactly these keys — no markdown, no explanation, no backticks:
+
+{
+  "adjusted_workout": "the full workout rewritten line by line. For every line with an explicit pace (e.g. 5:40/mile, 6:40, sub-7), apply the adjustment and show both: original → adjusted in parentheses. For lines with NO explicit pace (e.g. '2 mile warm up', 'cool down'), append a generic note like '(+X sec/${unitLabel} effort)' using the adjustment. Keep all original text intact.",
+  "key_segment_name": "short name of the most important/hardest segment of the workout (e.g. 'Interval: on pace', '10 x 400m', 'Tempo block')",
+  "key_segment_original": "the original pace for the key segment as written (e.g. '5:40/mile')",
+  "key_segment_adjusted": "the adjusted pace for the key segment (e.g. '5:52/mile')",
+  "summary": "exactly 3 bullet points, each under 12 words, written like a no-nonsense coach. Cover: (1) conditions impact, (2) key effort callout, (3) one execution tip. Return as a JSON array of 3 strings, e.g. [\"Humid — expect extra effort at adjusted paces.\", \"Hit the intervals controlled, not all-out.\", \"Start conservative; the back half will feel harder.\"]"
+}`;
+
+    try {
+      const response = await fetch('/api/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt })
+      });
+      const data = await response.json();
+      const raw = data.content.map(b => b.text || '').join('').trim();
+
+      let parsed;
+      try {
+        parsed = JSON.parse(raw.replace(/^```json|```$/g, '').trim());
+      } catch(e) {
+        // fallback: show raw text
+        document.getElementById('workout-result-text').textContent = raw;
+        document.getElementById('workout-summary').innerHTML = '';
+        document.getElementById('key-segment-box').style.display = 'none';
+        document.getElementById('workout-result').style.display = 'block';
+        document.getElementById('output-zone').style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = 'Calculate adjusted workout';
+        return;
+      }
+
+      // Key segment highlight
+      if (parsed.key_segment_name && parsed.key_segment_adjusted) {
+        document.getElementById('key-segment-name').textContent = parsed.key_segment_name;
+        document.getElementById('key-segment-pace').textContent = parsed.key_segment_adjusted;
+        document.getElementById('key-segment-unit').textContent = '/ ' + unitLabel;
+        document.getElementById('key-segment-original').textContent = 'was: ' + parsed.key_segment_original;
+        document.getElementById('key-segment-box').style.display = 'block';
+      } else {
+        document.getElementById('key-segment-box').style.display = 'none';
+      }
+
+      document.getElementById('workout-result-text').textContent = parsed.adjusted_workout || raw;
+      const summaryEl = document.getElementById('workout-summary');
+      summaryEl.innerHTML = '';
+      let bullets = parsed.summary;
+      if (typeof bullets === 'string') {
+        try { bullets = JSON.parse(bullets); } catch(e) { bullets = [bullets]; }
+      }
+      if (Array.isArray(bullets)) {
+        bullets.forEach(b => {
+          const li = document.createElement('li');
+          li.style.cssText = 'font-size:0.8125rem; color:var(--text-muted); padding-left:1rem; position:relative; line-height:1.4;';
+          li.innerHTML = '<span style="position:absolute;left:0;color:#7D2935;font-weight:500;">—</span>' + b;
+          summaryEl.appendChild(li);
+        });
+      } else {
+        summaryEl.innerHTML = '<li style="font-size:0.8125rem;color:var(--text-muted);">' + (parsed.summary || '') + '</li>';
+      }
+
+      document.getElementById('workout-result').style.display = 'block';
+      document.getElementById('output-zone').style.display = 'block';
+
+    } catch (err) {
+      document.getElementById('workout-result-text').textContent = 'Something went wrong — please try again.';
+      document.getElementById('workout-summary').innerHTML = '';
+      document.getElementById('key-segment-box').style.display = 'none';
+      document.getElementById('workout-result').style.display = 'block';
+      document.getElementById('output-zone').style.display = 'block';
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'Calculate adjusted workout';
+  }
+
+</script>
+</body>
+</html>
