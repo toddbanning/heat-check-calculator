@@ -602,7 +602,7 @@
     <div class="two-col">
       <div class="field">
         <label id="temp-label">Temperature (°F)</label>
-        <input type="number" id="temperature" placeholder="e.g. 85" />
+        <input type="number" id="temperature" placeholder="e.g. 85" oninput="checkColdWarning()" />
       </div>
       <div class="field">
         <label id="dew-label">Dew point (°F)</label>
@@ -610,6 +610,9 @@
       </div>
     </div>
     <p class="hint">Not sure of dew point? Check Weather.gov or your local weather app.</p>
+    <div id="cold-warning" style="display:none; margin-top:0.75rem; padding:0.65rem 0.875rem; background:#EEF1F6; border-radius:var(--radius-sm); border-left:3px solid #1B2A4A;">
+      <p style="font-size:0.8125rem; color:#1B2A4A; line-height:1.5; margin:0;">⚠ Heat Check is designed for hot running conditions. At these temperatures, standard training paces should apply — no adjustment needed.</p>
+    </div>
   </div>
 
   <!-- Feeling slider -->
@@ -661,14 +664,16 @@
     <div id="workout-result" style="display:none;">
       <!-- Key segment highlight -->
       <div id="key-segment-box" style="display:none; background:#1B2A4A; border-radius:var(--radius); padding:1.25rem 1.5rem; margin-bottom:1rem;">
-        <div style="font-size:0.7rem; font-weight:500; text-transform:uppercase; letter-spacing:0.09em; color:rgba(255,255,255,0.7); margin-bottom:0.35rem;">Key effort</div>
-        <div style="display:flex; align-items:baseline; gap:0.5rem; flex-wrap:wrap;">
-          <span id="key-segment-name" style="font-size:1rem; font-weight:500; color:#fff;"></span>
-          <span style="color:rgba(255,255,255,0.6); font-size:0.875rem;">→</span>
-          <span id="key-segment-pace" style="font-family:var(--mono); font-size:1.75rem; font-weight:500; color:#fff; letter-spacing:-0.02em;"></span>
-          <span id="key-segment-unit" style="font-size:0.875rem; color:rgba(255,255,255,0.7);">/ mile</span>
+        <div style="font-size:0.7rem; font-weight:500; text-transform:uppercase; letter-spacing:0.09em; color:rgba(255,255,255,0.5); margin-bottom:0.6rem;">Key effort</div>
+        <div style="margin-bottom:0.4rem;">
+          <span id="key-segment-name" style="font-size:0.875rem; font-weight:500; color:rgba(255,255,255,0.7); font-style:italic;"></span>
         </div>
-        <div id="key-segment-original" style="font-size:0.8125rem; color:rgba(255,255,255,0.6); margin-top:0.25rem;"></div>
+        <div style="display:flex; align-items:baseline; gap:0.5rem; flex-wrap:wrap;">
+          <span id="key-segment-original" style="font-family:var(--mono); font-size:0.9375rem; color:rgba(255,255,255,0.4); text-decoration:line-through;"></span>
+          <span style="color:rgba(255,255,255,0.4); font-size:0.8125rem;">→</span>
+          <span id="key-segment-pace" style="font-family:var(--mono); font-size:1.125rem; font-weight:500; color:#fff; letter-spacing:-0.01em; border-bottom: 2px solid #7D2935; padding-bottom:1px;"></span>
+          <span id="key-segment-unit" style="font-size:0.8125rem; color:rgba(255,255,255,0.5);">/ mile</span>
+        </div>
       </div>
 
       <!-- Full adjusted workout -->
@@ -720,6 +725,14 @@
     document.getElementById('intensity-help-text').textContent = intensityHelp[val];
     const colors = { easy: 'var(--accent)', tempo: 'var(--warning)', race: '#0A0A0A' };
     document.getElementById('intensity-help').style.borderLeftColor = colors[val];
+  }
+
+  function checkColdWarning() {
+    const tempRaw = parseFloat(document.getElementById('temperature').value);
+    const warning = document.getElementById('cold-warning');
+    if (isNaN(tempRaw)) { warning.style.display = 'none'; return; }
+    const tempF = toF(tempRaw);
+    warning.style.display = tempF < 60 ? 'block' : 'none';
   }
 
   function updateFeeling(val) {
@@ -809,8 +822,9 @@
 
     const adjustPct = getDewAdjustment(dewF, intensity);
     // Feeling slider: each step = 1% pace modifier. Negative = slower (weak day), positive = faster (strong day).
-    const feelingPct = -(feelingVal * 0.01); // -5 → +5% slower, +5 → -5% faster
-    const totalAdjustPct = adjustPct + feelingPct;
+    // Feeling offsets up to 20% of the heat adjustment — never produces a pace faster than planned
+    const feelingOffset = adjustPct * (feelingVal * 0.02); // max ±20% of heat adj at slider extremes
+    const totalAdjustPct = Math.max(0, adjustPct - feelingOffset);
     const addedSecPerUnit = paceSec * totalAdjustPct;
     const adjustedPaceSec = paceSec + addedSecPerUnit;
     const addedTotal = addedSecPerUnit * dist;
@@ -886,10 +900,10 @@
     const feelingVal = parseInt(document.getElementById('feeling-slider').value);
 
     const adjustPct = getDewAdjustment(dewF, intensity);
-    const feelingPct = -(feelingVal * 0.01);
-    const totalAdjustPct = adjustPct + feelingPct;
+    const feelingOffset = adjustPct * (feelingVal * 0.02);
+    const totalAdjustPct = Math.max(0, adjustPct - feelingOffset);
     const pctDisplay = (totalAdjustPct * 100).toFixed(1);
-    const direction = totalAdjustPct > 0 ? 'slower' : totalAdjustPct < 0 ? 'faster' : 'unchanged';
+    const direction = totalAdjustPct > 0 ? 'slower' : 'unchanged';
     const unitLabel = distUnit === 'miles' ? 'mile' : 'km';
 
     const btn = document.getElementById('main-calc-btn');
@@ -911,7 +925,7 @@ CONDITIONS:
 - Distance units: ${unitLabel}
 
 INSTRUCTIONS:
-Return ONLY a valid JSON object with exactly these keys — no markdown, no explanation, no backticks. All paces must be formatted as M:SS or MM:SS (e.g. 6:16, 10:05) — never use decimals in pace values:
+Return ONLY a valid JSON object with exactly these keys — no markdown, no explanation, no backticks:
 
 {
   "adjusted_workout": "the full workout rewritten line by line. For every line with an explicit pace (e.g. 5:40/mile, 6:40, sub-7), apply the adjustment and show both: original → adjusted in parentheses. For lines with NO explicit pace (e.g. '2 mile warm up', 'cool down'), append a generic note like '(+X sec/${unitLabel} effort)' using the adjustment. Keep all original text intact.",
@@ -922,10 +936,14 @@ Return ONLY a valid JSON object with exactly these keys — no markdown, no expl
 }`;
 
     try {
-     const response = await fetch('/api/analyze', {
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt })
+        body: JSON.stringify({
+          model: 'claude-haiku-4-5-20251001',
+          max_tokens: 1000,
+          messages: [{ role: 'user', content: prompt }]
+        })
       });
       const data = await response.json();
       const raw = data.content.map(b => b.text || '').join('').trim();
@@ -950,7 +968,7 @@ Return ONLY a valid JSON object with exactly these keys — no markdown, no expl
         document.getElementById('key-segment-name').textContent = parsed.key_segment_name;
         document.getElementById('key-segment-pace').textContent = parsed.key_segment_adjusted;
         document.getElementById('key-segment-unit').textContent = '/ ' + unitLabel;
-        document.getElementById('key-segment-original').textContent = 'was: ' + parsed.key_segment_original;
+        document.getElementById('key-segment-original').textContent = parsed.key_segment_original;
         document.getElementById('key-segment-box').style.display = 'block';
       } else {
         document.getElementById('key-segment-box').style.display = 'none';
