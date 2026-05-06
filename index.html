@@ -922,10 +922,14 @@ Return ONLY a valid JSON object with exactly these keys — no markdown, no expl
 }`;
 
     try {
-      const response = await fetch('/api/analyze', {
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt })
+        body: JSON.stringify({
+          model: 'claude-haiku-4-5-20251001',
+          max_tokens: 1000,
+          messages: [{ role: 'user', content: prompt }]
+        })
       });
       const data = await response.json();
       const raw = data.content.map(b => b.text || '').join('').trim();
