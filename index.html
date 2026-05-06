@@ -911,7 +911,7 @@ CONDITIONS:
 - Distance units: ${unitLabel}
 
 INSTRUCTIONS:
-Return ONLY a valid JSON object with exactly these keys — no markdown, no explanation, no backticks:
+Return ONLY a valid JSON object with exactly these keys — no markdown, no explanation, no backticks. All paces must be formatted as M:SS or MM:SS (e.g. 6:16, 10:05) — never use decimals in pace values:
 
 {
   "adjusted_workout": "the full workout rewritten line by line. For every line with an explicit pace (e.g. 5:40/mile, 6:40, sub-7), apply the adjustment and show both: original → adjusted in parentheses. For lines with NO explicit pace (e.g. '2 mile warm up', 'cool down'), append a generic note like '(+X sec/${unitLabel} effort)' using the adjustment. Keep all original text intact.",
